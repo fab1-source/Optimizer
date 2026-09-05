@@ -1,0 +1,6 @@
+{
+  "name": "2D Glass Cutting Stock Optimizer",
+  "description": "Industrial 2D guillotine cutting optimizer for glass sheets with waste visualization, cut sequences, and shop floor print sheets.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
