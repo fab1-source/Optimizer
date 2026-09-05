@@ -24,6 +24,7 @@ import { CncExportModal } from './components/CncExportModal';
 import { PrintTicketModal } from './components/PrintTicketModal';
 import { ServerConnectionModal } from './components/ServerConnectionModal';
 import { UserLoginModal } from './components/UserLoginModal';
+import { LoginScreen } from './components/LoginScreen';
 import { AppUser } from './types';
 import { DEFAULT_ACTIVE_USER } from './data/users';
 import {
@@ -115,6 +116,16 @@ export default function App() {
   // Navigation: defaults directly to 'dashboard' so users open on the Dashboard
   const [currentView, setCurrentView] = useState<'dashboard' | 'workspace'>('dashboard');
 
+  // User Authentication Gate
+  // When opening on server or any PC, it must open with asking for login!
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    try {
+      return sessionStorage.getItem('glazing_session_authenticated') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
   // Active User Profile (User 1, User 2, or User 3)
   const [currentUser, setCurrentUser] = useState<AppUser>(() => {
     try {
@@ -203,7 +214,9 @@ export default function App() {
   // Requirement: After logging on from User 1 or any other user, it MUST open on dashboard!
   const handleLoginUser = (user: AppUser) => {
     setCurrentUser(user);
+    setIsAuthenticated(true);
     try {
+      sessionStorage.setItem('glazing_session_authenticated', 'true');
       localStorage.setItem('active_glazing_user', JSON.stringify(user));
     } catch {
       // ignore
@@ -212,6 +225,15 @@ export default function App() {
     setCurrentView('dashboard'); // ALWAYS open on dashboard!
     setLoginBanner(`Logged on as ${user.name} (${user.role.toUpperCase()}) • Opened on Jobs Dashboard`);
     setTimeout(() => setLoginBanner(null), 4500);
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    try {
+      sessionStorage.removeItem('glazing_session_authenticated');
+    } catch {
+      // ignore
+    }
   };
 
   // Active job ID (defaults to first job)
@@ -517,6 +539,17 @@ export default function App() {
     return Array.from(map.values());
   }, [activeJob?.result?.sheets]);
 
+  // User Authentication Gate: If not authenticated, open with asking for login!
+  if (!isAuthenticated) {
+    return (
+      <LoginScreen
+        onSelectUser={handleLoginUser}
+        serverInfo={serverInfo}
+        serverOnline={serverOnline}
+      />
+    );
+  }
+
   // If on dashboard view, render JobDashboard
   if (currentView === 'dashboard') {
     return (
@@ -538,6 +571,7 @@ export default function App() {
           currentUser={currentUser}
           onSwitchUser={handleLoginUser}
           onOpenLogin={() => setIsLoginModalOpen(true)}
+          onLogout={handleLogout}
           serverOnline={serverOnline}
           onOpenServerModal={() => setIsServerModalOpen(true)}
         />
@@ -583,6 +617,7 @@ export default function App() {
         currentUser={currentUser}
         onSwitchUser={handleLoginUser}
         onOpenLogin={() => setIsLoginModalOpen(true)}
+        onLogout={handleLogout}
         serverOnline={serverOnline}
         onOpenServerModal={() => setIsServerModalOpen(true)}
         onBackToDashboard={() => setCurrentView('dashboard')}

@@ -10,7 +10,8 @@ import {
   Unlock,
   Server,
   User,
-  ChevronDown
+  ChevronDown,
+  LogOut
 } from 'lucide-react';
 import { JobStatus, AppUser } from '../types';
 import { SYSTEM_USERS } from '../data/users';
@@ -25,6 +26,7 @@ interface HeaderProps {
   currentUser?: AppUser;
   onSwitchUser?: (user: AppUser) => void;
   onOpenLogin?: () => void;
+  onLogout?: () => void;
   serverOnline?: boolean;
   onOpenServerModal?: () => void;
   onBackToDashboard: () => void;
@@ -50,6 +52,7 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   onSwitchUser,
   onOpenLogin,
+  onLogout,
   serverOnline = true,
   onOpenServerModal,
   onBackToDashboard,
@@ -256,6 +259,19 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <span>Switch / Log On Account...</span>
                       <User className="w-3 h-3 text-blue-400" />
+                    </button>
+                  )}
+                  {onLogout && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsUserMenuOpen(false);
+                        onLogout();
+                      }}
+                      className="w-full px-3 py-1.5 text-left text-[11px] border-t border-[#2d3748] text-rose-400 hover:text-rose-300 hover:bg-rose-950/40 transition flex items-center justify-between cursor-pointer"
+                    >
+                      <span>Log Out (Ask for Login)</span>
+                      <LogOut className="w-3 h-3 text-rose-400" />
                     </button>
                   )}
                 </div>
